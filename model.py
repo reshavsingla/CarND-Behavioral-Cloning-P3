@@ -13,13 +13,20 @@ with open("./data/driving_log.csv") as csvfile:
 lines.pop(0)
 images = []
 measurements = []
+correction = 0.2
+steering_correction = [0, correction, -correction]
 for line in lines:
-    image_path = line[0]
-    image_name = image_path.split('/')[-1]
-    source_path = './data/IMG/' + image_name
-    image = cv2.imread(source_path)
-    images.append(image)
-    measurements.append(float(line[3]))
+    for i in range(3):
+        image_path = line[i]
+        image_name = image_path.split('/')[-1]
+        source_path = './data/IMG/' + image_name
+        image = cv2.imread(source_path)
+        steering_measurement = float(line[3]) + steering_correction[i]
+        images.append(image)
+        measurements.append(steering_measurement)
+        image_flipped = np.fliplr(image)
+        images.append(image_flipped)
+        measurements.append((-1 * steering_measurement))
 
 X_train = np.array(images)
 y_train = np.array(measurements)
