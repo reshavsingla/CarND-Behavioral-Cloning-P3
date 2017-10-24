@@ -3,13 +3,13 @@ import cv2
 import numpy as np
 import sklearn
 from keras.models import Sequential
-from keras.layers import Flatten, Dense, Lambda, Conv2D, Cropping2D
+from keras.layers import Flatten, Dense, Lambda, Conv2D, Cropping2D, Dropout
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 
 
 lines = []
-with open("./data/driving_log.csv") as csvfile:
+with open("./training_data/driving_log.csv") as csvfile:
     reader = csv.reader(csvfile)
     for line in reader:
         lines.append(line)
@@ -33,14 +33,15 @@ def generator(samples, batch_size=32):
                 for i in range(3):
                     image_path = line[i]
                     image_name = image_path.split('/')[-1]
-                    source_path = './data/IMG/' + image_name
+                    source_path = './training_data/IMG/' + image_name
                     image = cv2.imread(source_path)
                     steering_measurement = float(line[3]) + steering_correction[i]
                     images.append(image)
                     measurements.append(steering_measurement)
-                    image_flipped = np.fliplr(image)
-                    images.append(image_flipped)
-                    measurements.append((-1 * steering_measurement))
+                    if i == 0:
+                        image_flipped = np.fliplr(image)
+                        images.append(image_flipped)
+                        measurements.append((-1 * steering_measurement))
 
             X_train = np.array(images)
             y_train = np.array(measurements)
@@ -48,8 +49,8 @@ def generator(samples, batch_size=32):
 
 
 # compile and train the model using the generator function
-train_generator = generator(train_samples, batch_size=32)
-validation_generator = generator(validation_samples, batch_size=32)
+train_generator = generator(train_samples, batch_size=512)
+validation_generator = generator(validation_samples, batch_size=512)
 
 
 model = Sequential()
@@ -62,11 +63,13 @@ model.add(Conv2D(64, (3, 3), activation="relu"))
 model.add(Conv2D(64, (3, 3), activation="relu"))
 model.add(Flatten())
 model.add(Dense(100))
+model.add(Dropout(0.5))
 model.add(Dense(50))
+model.add(Dropout(0.5))
 model.add(Dense(10))
 model.add(Dense(1))
 
 model.compile(loss='mse', optimizer='adam')
 model.fit_generator(train_generator, samples_per_epoch=len(train_samples), validation_data=validation_generator,
-                    nb_val_samples=len(validation_samples), nb_epoch=5)
+                    nb_val_samples=len(validation_samples), nb_epoch=3)
 model.save('model.h5')
