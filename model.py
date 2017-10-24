@@ -72,5 +72,5 @@ model.add(Dense(1))
 model.compile(loss='mse', optimizer='adam')
 model.fit_generator(train_generator, steps_per_epoch=np.ceil(len(train_samples)/32),
                     validation_data=validation_generator, validation_steps=np.ceil(len(validation_samples)/32),
-                    nb_epoch=3)
+                    epochs=3)
 model.save('model.h5')
