@@ -67,10 +67,11 @@ model.add(Dropout(0.5))
 model.add(Dense(50))
 model.add(Dropout(0.5))
 model.add(Dense(10))
+model.add(Dropout(0.5))
 model.add(Dense(1))
 
 model.compile(loss='mse', optimizer='adam')
 model.fit_generator(train_generator, steps_per_epoch=np.ceil(len(train_samples)/32),
                     validation_data=validation_generator, validation_steps=np.ceil(len(validation_samples)/32),
-                    epochs=3)
+                    epochs=5)
 model.save('model.h5')
