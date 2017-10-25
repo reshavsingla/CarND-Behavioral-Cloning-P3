@@ -27,7 +27,7 @@ def generator(samples, batch_size=32):
 
             images = []
             measurements = []
-            correction = 0.2
+            correction = 0
             steering_correction = [0, correction, -correction]
             for line in batch_samples:
                 for i in range(3):
@@ -38,10 +38,9 @@ def generator(samples, batch_size=32):
                     steering_measurement = float(line[3]) + steering_correction[i]
                     images.append(image)
                     measurements.append(steering_measurement)
-                    if i == 0:
-                        image_flipped = np.fliplr(image)
-                        images.append(image_flipped)
-                        measurements.append((-1 * steering_measurement))
+                    image_flipped = np.fliplr(image)
+                    images.append(image_flipped)
+                    measurements.append((-1 * steering_measurement))
 
             X_train = np.array(images)
             y_train = np.array(measurements)
